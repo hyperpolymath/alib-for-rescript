@@ -17,7 +17,7 @@ This repo is *not* a replacement standard library.
 We commit to:
 
 * *Namespacing:* All public APIs live under a clear prefix (e.g. `Aggregate.*` / `Alib.*`). No shadowing of `Option`, `Result`, `Array`, etc.
-* *Upstream-first:* `@rescript/core` / compiler `Stdlib` and Melange `Stdlib` remain the sources of truth.
+* *Upstream-first:* Upstream stdlibs remain the sources of truth.
 * *Reversible adoption:* Per-file, per-module adoption; easy to remove.
 * *Optional validation:* Proven-powered checks are opt-in entrypoints, not required usage.
 * *Deletion-friendly:* Anything that graduates upstream is deprecated and removed here to avoid long-term duplication.
@@ -50,8 +50,8 @@ This repo is deliberately split so we can:
 == Relationship to aggregate-library
 `aggregate-library` is the methods + stress-test lab: overlap demos and extreme constraints.
 
-This repo is the practical application for the ReScript community:
-it uses the method (clear boundaries + tests + reversibility), but targets real ReScript/Melange workflows.
+This repo applies the method to real ReScript ecosystem needs:
+clear boundaries + tests + reversibility, plus optional integration of ideas from Proven where they help.
 
 == Proven integration (optional)
 Proven is supported only where it improves boundary safety (FFI/JSON/untyped data).
@@ -62,7 +62,7 @@ Rules:
 * Non-Proven paths remain first-class and documented.
 * Proven usage should be easy to remove without redesigning code.
 
-== Repo structure (suggested)
+== Repo structure
 [source]
 ----
 alib-for-rescript/
@@ -78,10 +78,10 @@ alib-for-rescript/
     MIGRATION_GUIDE.adoc
     DESIGN_NOTES.adoc
   tests/
-    compat/          # “must behave like upstream” checks
-    property/        # fuzz/generative tests where useful
+    compat/
+    property/
   scripts/
-    codemods/        # optional migration helpers
+    codemods/
 ----
 
 == Adoption strategy
