@@ -4,113 +4,110 @@
 :sectanchors:
 :icons: font
 
-A practical aLib implementation for the ReScript ecosystem: a *proving ground + adapter layer* that brings together ReScript’s stdlib direction, Melange compatibility, and optional runtime validation (Proven) — without replacing upstream standard libraries.
+A practical aLib implementation for the ReScript ecosystem: a *proving ground + adapter layer* that brings together ReScript stdlib direction, Melange compatibility, and optional Proven validation — while staying upstream-first and reversible.
 
 toc::[]
 
 == Status
 Alpha / opt-in / namespaced.
 
-== The promise (anti-tears contract)
-*Not a replacement stdlib.*
+== The “no tears” contract
+This repo is *not* a replacement standard library.
 
-This project is:
+We commit to:
 
-* Namespaced (`Aggregate.*` or `Alib.*`) to avoid shadowing upstream modules.
-* Upstream-first: upstream stdlibs remain the source of truth.
-* Delete-friendly: modules can graduate upstream or be removed if the experiment isn’t valuable.
-* Optional validation: Proven integration is opt-in and can be removed without changing core APIs.
+* *Namespacing:* All public APIs live under a clear prefix (e.g. `Aggregate.*` / `Alib.*`). No shadowing of `Option`, `Result`, `Array`, etc.
+* *Upstream-first:* `@rescript/core` / compiler `Stdlib` and Melange `Stdlib` remain the sources of truth.
+* *Reversible adoption:* Per-file, per-module adoption; easy to remove.
+* *Optional validation:* Proven-powered checks are opt-in entrypoints, not required usage.
+* *Deletion-friendly:* Anything that graduates upstream is deprecated and removed here to avoid long-term duplication.
 
 == What this repo is
-This repo is an ecosystem *implementation* of the aLib method:
+This is the *ecosystem implementation* of the aLib method for ReScript developers.
 
-* A “Common” layer that is practical for *ReScript + Melange* workflows.
-* A “Specific” layer for ReScript ergonomics and higher-level utilities.
-* Compatibility adapters so real projects can adopt one module at a time.
+It provides:
 
-It is designed to:
-
-* reduce duplication between ReScript/Melange-targeted projects,
-* provide safer interop boundaries,
-* and create a low-risk proving ground for improvements that might later be proposed upstream.
+* A *Common* layer: utilities and patterns that work cleanly across ReScript + Melange constraints.
+* A *Specific* layer: ReScript-centric ergonomics and higher-level helpers that are intentionally not “common”.
+* Compatibility adapters: explicit conversions/escape hatches to/from upstream types and runtime modules.
+* Optional Proven integration: safer boundaries for FFI / JSON / external data during development.
 
 == What this repo is NOT
-* Not “the new ReScript standard library”.
+* Not “the new ReScript stdlib”.
 * Not a fork of upstream stdlibs.
-* Not a mandate for the compiler team.
-* Not a requirement for library authors.
+* Not a mandate for compiler/tooling direction.
+* Not required for library authors.
 
-== Relationship to upstream
-ReScript and Melange both ship/expect standard library surfaces (with ecosystem-specific packaging and integration details). :contentReference[oaicite:1]{index=1}
+== Why Common + Specific?
+This repo is deliberately split so we can:
 
-This project sits *beside* them:
+* keep a small “Common” surface stable and testable,
+* iterate on “Specific” without fear of fragmenting the ecosystem,
+* and propose upstream changes selectively (only where maintainers want them).
 
-* uses upstream types where appropriate,
-* provides adapters where the build/runtime packaging differs,
-* and keeps experiments namespaced and reversible.
+“Common” here means: *common to ReScript + Melange usage patterns we support*, not universal across all languages or all runtimes.
 
-== Proven integration
-Proven is supported as an *optional* runtime validation layer for risky boundaries (FFI, untyped JSON, external data).
+== Relationship to aggregate-library
+`aggregate-library` is the methods + stress-test lab: overlap demos and extreme constraints.
 
-ReScript bindings exist as `@hyperpolymath/proven-rescript`. :contentReference[oaicite:2]{index=2}
+This repo is the practical application for the ReScript community:
+it uses the method (clear boundaries + tests + reversibility), but targets real ReScript/Melange workflows.
+
+== Proven integration (optional)
+Proven is supported only where it improves boundary safety (FFI/JSON/untyped data).
 
 Rules:
 
-* Proven entrypoints are opt-in.
-* Validation-heavy APIs are documented as such.
-* The “no-Proven path” remains first-class.
+* Proven entrypoints are opt-in (e.g. `fromJsonWithSchema`).
+* Non-Proven paths remain first-class and documented.
+* Proven usage should be easy to remove without redesigning code.
 
-== Repo structure
+== Repo structure (suggested)
 [source]
 ----
 alib-for-rescript/
   README.adoc
   packages/
-    common/         # shared across ReScript + Melange constraints
-    rescript/       # ReScript-specific utilities and ergonomics
-    melange/        # Melange adapters and shims
-    proven/         # optional Proven schemas/adapters
-    compat/         # to/from upstream conversions, escape hatches
+    common/          # shared across ReScript + Melange constraints
+    specific/        # ReScript-centric ergonomics / higher-level helpers
+    melange/         # melange adapters and shims
+    proven/          # optional Proven schemas/adapters
+    compat/          # explicit conversions to/from upstream types
   docs/
     ALPHA.adoc
     MIGRATION_GUIDE.adoc
     DESIGN_NOTES.adoc
   tests/
-    compat/         # “must behave like upstream” checks
-    property/       # fuzz/generative tests (where useful)
+    compat/          # “must behave like upstream” checks
+    property/        # fuzz/generative tests where useful
   scripts/
-    codemods/       # optional migration helpers
+    codemods/        # optional migration helpers
 ----
 
 == Adoption strategy
-*Per-file adoption.*
+Per-file adoption:
 
-1. Use one namespaced module in one file.
-2. Keep upstream stdlib everywhere else.
-3. Convert to/from upstream types only at boundaries.
-4. If you stop using aLib, remove it cleanly.
+. Import one namespaced module in one file.
+. Keep upstream stdlib everywhere else.
+. Convert at boundaries only (via `compat/` helpers).
+. If you stop using aLib, remove it cleanly.
 
-== Graduation policy
-A module can be:
+== Graduation / retirement policy
+Each module has one of these outcomes:
 
-* Experimental: iterate quickly (namespaced).
-* Stable: semver discipline + tests.
-* Proposed: RFC upstream (ReScript/Melange as appropriate).
-* Upstreamed: deprecated + removed here to avoid duplication.
-* Retained: stays here only if it’s inherently ecosystem glue (adapters, codemods, boundary helpers).
-
-== Why this exists
-The aLib method repo (`aggregate-library`) demonstrates overlap + stress testing.
-This repo applies the method to real ReScript ecosystem needs:
-Proven integration, Melange compatibility, and practical “Common + Specific” boundaries.
+* *Experiment:* fast iteration, namespaced, obvious warnings in docs.
+* *Stable:* semver discipline + tests.
+* *Propose upstream:* only if maintainers want it and it fits upstream goals.
+* *Upstreamed:* deprecate here, remove here, keep only adapters if needed.
+* *Remain here:* if it is inherently ecosystem glue (adapters, codemods, boundary helpers).
 
 == Contributing
-Contributions should minimize maintenance burden:
+We prefer contributions that reduce long-term maintenance load:
 
-* small modules,
-* explicit upstream mapping,
-* tests that clarify intent,
+* small modules with explicit upstream mapping,
+* clear docs for boundary behavior,
+* tests for stabilization,
 * and reversible changes.
 
 == License
-(TODO)
+PLMP-1.0.0-or-later
